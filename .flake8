@@ -1,0 +1,11 @@
+[flake8]
+hang_closing = False
+indent-size = 2
+max-line-length = 120
+ignore = E111
+ignore = E501
+
+# For autopep8
+# aggressive = 1
+
+inline-quotes = '
