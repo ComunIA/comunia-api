@@ -1,8 +1,9 @@
+from typing import Dict, Tuple, List, Optional
+
 import numpy as np
 import pandas as pd
 import pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
-from typing import Dict, Tuple, List, Optional
 
 from common.constants import *
 from common.gpt_actions import summarize_complaints, question_complaints, complaints_db

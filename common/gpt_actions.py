@@ -1,5 +1,6 @@
 import os
 from time import time, sleep
+from typing import Dict, List, Tuple, Optional, Any
 
 import openai
 from openai import Embedding, ChatCompletion, Completion
@@ -18,11 +19,11 @@ from langchain.vectorstores import Pinecone
 from langchain.chains import RetrievalQA
 from langchain.agents import ConversationalAgent, AgentExecutor
 from langchain import LLMChain
+from langchain.chains import ConversationalRetrievalChain
+import pinecone
+
 from common.constants import *
 from common.utils import to_text_list, file_to_df, chunk_list
-from langchain.chains import ConversationalRetrievalChain
-from typing import Dict, List, Tuple, Optional, Any
-import pinecone
 
 
 openai.api_key = OPENAI_API_KEY

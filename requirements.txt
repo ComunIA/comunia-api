@@ -1,122 +1,58 @@
 aiohttp==3.8.4
 aiosignal==1.3.1
-anyio==3.6.2
-astroid==2.15.1
 async-timeout==4.0.2
 attrs==22.2.0
-backoff==2.2.1
-Bottleneck @ file:///Users/cbousseau/work/recipes/ci_py311/bottleneck_1677925122241/work
-brotlipy==0.7.0
+beautifulsoup4==4.12.0
+bs4==0.0.1
 certifi @ file:///Users/cbousseau/work/recipes/ci_py311/certifi_1677903144932/work/certifi
-cffi @ file:///Users/cbousseau/work/recipes/ci_py311/cffi_1677903595907/work
-charset-normalizer @ file:///home/conda/feedstock_root/build_artifacts/charset-normalizer_1661170624537/work
-chromadb==0.3.17
-click==8.0.3
-clickhouse-connect==0.5.18
-colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1666700638685/work
+charset-normalizer==3.1.0
+click==8.1.3
 contourpy==1.0.7
-cryptography @ file:///Users/cbousseau/work/recipes/ci_py311_2/cryptography_1678994456782/work
 cycler==0.11.0
 dataclasses-json==0.5.7
-dill==0.3.6
 dnspython==2.3.0
-duckdb==0.7.1
-et-xmlfile @ file:///home/conda/feedstock_root/build_artifacts/et_xmlfile_1674664118162/work
-fastapi==0.95.0
-filelock==3.10.7
-Flask @ file:///opt/conda/conda-bld/flask_1648041541647/work
-Flask-Cors @ file:///tmp/build/80754af9/flask-cors_1609957731919/work
-Flask-JWT-Extended==4.4.4
-fonttools==4.39.2
+Flask==2.2.3
+Flask-Cors==3.0.10
+fonttools==4.39.3
 frozenlist==1.3.3
-geojson==2.5.0
-grpcio==1.53.0
-grpcio-tools==1.53.0
-h11==0.14.0
-hnswlib==0.7.0
-httptools==0.5.0
-huggingface-hub==0.13.3
-idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1663625384323/work
-isort==5.12.0
-itsdangerous @ file:///tmp/build/80754af9/itsdangerous_1621432558163/work
-Jinja2 @ file:///opt/conda/conda-bld/jinja2_1647436528585/work
+idna==3.4
+itsdangerous==2.1.2
+Jinja2==3.1.2
 joblib==1.2.0
 kiwisolver==1.4.4
-langchain==0.0.125
-lazy-object-proxy==1.9.0
+langchain==0.0.131
 loguru==0.6.0
-lz4==4.3.2
-MarkupSafe @ file:///Users/cbousseau/work/recipes/ci_py311/markupsafe_1677914270710/work
+MarkupSafe==2.1.2
 marshmallow==3.19.0
 marshmallow-enum==1.5.1
 matplotlib==3.7.1
-mccabe @ file:///opt/conda/conda-bld/mccabe_1644221741721/work
-mmh3==3.0.0
-monotonic==1.6
 more-itertools==9.1.0
-mpmath==1.3.0
 multidict==6.0.4
 mypy-extensions==1.0.0
-networkx==3.0
-nltk==3.8.1
-numexpr @ file:///Users/cbousseau/work/recipes/ci_py311_2/numexpr_1678995162705/work
-numpy @ file:///Users/cbousseau/work/recipes/ci_py311/numpy_and_numpy_base_1677921358445/work
-openai==0.27.2
-openpyxl @ file:///home/conda/feedstock_root/build_artifacts/openpyxl_1632332968451/work
+numpy==1.24.2
+openai==0.27.4
 packaging==23.0
-pandas==1.5.3
-pandas-stubs @ file:///home/conda/feedstock_root/build_artifacts/pandas-stubs_1679414014789/work
-pathspec==0.11.1
-Pillow==9.4.0
+pandas==2.0.0
+Pillow==9.5.0
 pinecone-client==2.2.1
-platformdirs==3.2.0
-posthog==2.4.2
-protobuf==3.20.0
-pycodestyle @ file:///Users/cbousseau/work/recipes/ci_py311/pycodestyle_1677927047034/work
-pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1636257122734/work
-pycryptodome==3.15.0
 pydantic==1.10.7
-pyflakes @ file:///Users/cbousseau/work/recipes/ci_py311/pyflakes_1677927066386/work
-PyJWT==2.6.0
-pylint==2.17.1
-pyOpenSSL @ file:///home/conda/feedstock_root/build_artifacts/pyopenssl_1672659226110/work
-pyowm==3.3.0
-pyparsing @ file:///tmp/build/80754af9/pyparsing_1635766073266/work
-pypdf==3.7.0
-PySocks @ file:///home/conda/feedstock_root/build_artifacts/pysocks_1661604839144/work
-python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+pyparsing==3.0.9
+python-dateutil==2.8.2
 python-dotenv==1.0.0
-pytz==2021.3
+pytz==2023.3
 PyYAML==6.0
-regex==2023.3.23
-requests @ file:///home/conda/feedstock_root/build_artifacts/requests_1673863902341/work
+requests==2.28.2
 scikit-learn==1.2.2
 scipy==1.10.1
-sentence-transformers==2.2.2
-sentencepiece==0.1.97
-six @ file:///tmp/build/80754af9/six_1644875935023/work
-sniffio==1.3.0
+six==1.16.0
+soupsieve==2.4
 SQLAlchemy==1.4.47
-starlette==0.26.1
-sympy==1.11.1
 tenacity==8.2.2
 threadpoolctl==3.1.0
-tokenizers==0.13.2
-tomlkit==0.11.7
-torch==2.0.0
-torchvision==0.15.1
-tqdm @ file:///home/conda/feedstock_root/build_artifacts/tqdm_1677948868469/work
-transformers==4.27.4
-types-pytz @ file:///home/conda/feedstock_root/build_artifacts/types-pytz_1677064973366/work
+tqdm==4.65.0
 typing-inspect==0.8.0
-typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1678559861143/work
-ujson==5.4.0
-urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1678635778344/work
-uvicorn==0.21.1
-uvloop==0.17.0
-watchfiles==0.19.0
-websockets==10.4
-Werkzeug @ file:///opt/conda/conda-bld/werkzeug_1645628268370/work
-wrapt==1.15.0
+typing_extensions==4.5.0
+tzdata==2023.3
+urllib3==1.26.15
+Werkzeug==2.2.3
 yarl==1.8.2
-zstandard==0.20.0

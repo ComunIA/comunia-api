@@ -1,11 +1,10 @@
 import os
 import json
+from functools import wraps
+from typing import Optional
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-from typing import Optional
-from functools import wraps
-from jwt import decode, InvalidTokenError
 
 from common.utils import ids_to_hash
 from functionalities import filter_complaints, grouping_community, messages, get_answer, generate_report, Filtering

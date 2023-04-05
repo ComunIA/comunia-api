@@ -1,3 +1,5 @@
+from typing import List
+
 import more_itertools
 import pinecone
 import pandas as pd
@@ -7,7 +9,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import LabelEncoder
 from sklearn.manifold import TSNE
-from typing import List
 
 from common.utils import *
 from common.gpt_actions import *
