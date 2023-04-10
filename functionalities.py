@@ -7,7 +7,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 
 from common.constants import *
 from common.utils import *
-from common.db import find_complaints
+from common.db import find_complaints, get_complaints_from_ids, complaints_collection, reports_collection
 from common.gpt_actions import summarize_complaints, question_complaints, complaints_db
 from clustering import df_clustering
 
@@ -74,15 +74,10 @@ def get_answer(question: str, report_ids: List[str]) -> str:
 
 def generate_report(report_ids: List[str]) -> str:
   id = ids_to_hash(report_ids)
-  df_community_reports = file_to_df(FILE_NEIGHBORHOOD_REPORTS, 'id')
-  if not df_community_reports.empty and id in df_community_reports.index:
-    return df_community_reports.loc[id]['report']
-
+  document = reports_collection.find_one({'_id': id})
+  if document:
+    return document['report']
   complaints = get_complaints_from_ids(report_ids)['complaint']
   report = summarize_complaints(complaints)
-  reports = []
-  if not df_community_reports.empty:
-    reports = df_community_reports.reset_index().to_dict('records')
-  reports.append({'id': id, 'report': report, 'report_ids': report_ids})
-  save_yaml(FILE_NEIGHBORHOOD_REPORTS, reports)
+  reports_collection.insert_one({'_id': id, 'report': report, 'report_ids': report_ids})
   return report
