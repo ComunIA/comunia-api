@@ -16,6 +16,7 @@ import gridfs
 from common.utils import *
 from common.gpt_actions import *
 from common.constants import *
+from common.db import db
 
 THRESHOLD = 2
 WEIGHTS = [0.45, 0.45, 0.1]
@@ -143,8 +144,6 @@ def get_similarities(df: pd.DataFrame, weights: List[float]) -> np.ndarray:
 
 
 def save_npy_to_gridfs(compute_array, collection_name, file_name):
-  client = MongoClient(MONGODB_CONNECTION)
-  db = client[MONGODB_PROJECT]
   fs = gridfs.GridFS(db, collection=collection_name)
 
   file_doc = fs.find_one({'filename': file_name})
@@ -158,14 +157,25 @@ def save_npy_to_gridfs(compute_array, collection_name, file_name):
       file_doc = fp
   contents = fs.get(file_doc._id).read()
   npy_array = np.load(io.BytesIO(contents))
-  client.close()
   return npy_array
 
 
 def df_clustering(df: pd.DataFrame, threshold: float, weights: List[float]) -> pd.DataFrame:
-  # df = remove_outliers(df)
+  collection = db['clustering']
+  query = {'threshold': threshold, 'weights': weights}
+  documents = list(collection.find(query))
+  if documents:
+    new_df = pd.DataFrame(documents).set_index('report_id')
+    df['cluster'] = new_df.loc[df.index]['cluster']
+    return df
+
   similarities = get_similarities(df, weights)
   df['cluster'] = autocluster(similarities, threshold)
+  documents = []
+  for index, row in df.iterrows():
+    document = {'threshold': threshold, 'weights': weights, 'report_id': index, 'cluster': row['cluster']}
+    documents.append(document)
+  collection.insert_many(documents)
   return df
 
 

@@ -30,9 +30,6 @@ class Filtering:
 
 
 messages: Dict[str, List[Tuple[str, str]]] = {}
-# filtering = Filtering()
-# df_complaints = get_complaints()
-# df_processed = df_clustering(df_complaints, filtering.threshold, CLUSTER_PERCENTAGES)
 
 
 def get_complaints_score(query: str, amount: int, vector_filter=None) -> pd.DataFrame:
