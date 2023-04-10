@@ -14,7 +14,7 @@ MIN_GENERATE_CLUSTER = 3
 
 
 app = Flask(__name__)
-cors = CORS(app, support_credentials=True)
+cors = CORS(app, origins=os.getenv('CORS_ORIGIN').split(','))
 app.config['JSON_AS_ASCII'] = False
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SECRET_KEY'] = os.getenv('API_SECRET_KEY')
@@ -37,7 +37,6 @@ def api_key_required(f):
 
 
 @app.route('/complaints', methods=['POST'])
-@cross_origin()
 @api_key_required
 def get_complaints():
   data = request.get_json()
@@ -48,7 +47,6 @@ def get_complaints():
 
 
 @app.route('/reports', methods=['POST'])
-@cross_origin()
 @api_key_required
 def get_reports():
   data = request.get_json()
@@ -60,7 +58,6 @@ def get_reports():
 
 
 @app.route('/reports/generate', methods=['POST'])
-@cross_origin()
 @api_key_required
 def api_generate_report():
   data = request.get_json()
@@ -72,7 +69,6 @@ def api_generate_report():
 
 
 @app.route('/chat/history', methods=['POST'])
-@cross_origin()
 @api_key_required
 def api_chat_history():
   data = request.get_json()
@@ -82,7 +78,6 @@ def api_chat_history():
 
 
 @app.route('/chat/message', methods=['POST'])
-@cross_origin()
 @api_key_required
 def api_chat():
   data = request.get_json()
@@ -93,7 +88,6 @@ def api_chat():
 
 
 @app.route('/chat/clear', methods=['POST'])
-@cross_origin()
 @api_key_required
 def api_chat_reset():
   data = request.get_json()
