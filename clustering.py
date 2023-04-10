@@ -1,3 +1,4 @@
+import io
 from typing import List
 
 import more_itertools
@@ -9,6 +10,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import LabelEncoder
 from sklearn.manifold import TSNE
+from functools import partial
+import gridfs
 
 from common.utils import *
 from common.gpt_actions import *
@@ -17,35 +20,35 @@ from common.constants import *
 THRESHOLD = 2
 WEIGHTS = [0.45, 0.45, 0.1]
 MAX_IDS_PER_REQUEST = 1000
-FILE_SIMILARITIES = 'data/other/similarities_{}.npy'
+FILE_SIMILARITIES = 'similarities_{}.npy'
 
 
 def fetch_pinecone(ids: List[str]) -> pd.DataFrame:
-  index = pinecone.Index(PINECONE_INDEX_COMPLAINTS)
+  index = pinecone.Index(PINECONE_INDEX_NAME)
   contents = []
   for id_chunk in more_itertools.chunked(ids, MAX_IDS_PER_REQUEST):
-    content = index.fetch(id_chunk)
+    content = index.fetch(id_chunk, namespace='complaints')
     contents.extend(content['vectors'].values())
   vector_data = [
-      dict(report_id=x['id'], vector=np.array(x['values']))
+      {C_REPORT_ID: x['id'], "vector": np.array(x['values'])}
       for x in contents if x and x['values']
   ]
   df_vectors = pd.DataFrame(vector_data).set_index(C_REPORT_ID)
   return df_vectors
 
 
-def remove_outliers(df: pd.DataFrame, lat_col: str, lon_col: str) -> pd.DataFrame:
+def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
   """
   Remove outliers from a DataFrame based on latitude and longitude using the IQR method.
   """
   # Calculate the IQR of the latitude column
-  lat_Q1 = df[lat_col].quantile(0.25)
-  lat_Q3 = df[lat_col].quantile(0.75)
+  lat_Q1 = df[C_LATITUDE].quantile(0.25)
+  lat_Q3 = df[C_LATITUDE].quantile(0.75)
   lat_IQR = lat_Q3 - lat_Q1
 
   # Calculate the IQR of the longitude column
-  lon_Q1 = df[lon_col].quantile(0.25)
-  lon_Q3 = df[lon_col].quantile(0.75)
+  lon_Q1 = df[C_LONGITUDE].quantile(0.25)
+  lon_Q3 = df[C_LONGITUDE].quantile(0.75)
   lon_IQR = lon_Q3 - lon_Q1
 
   # Define the upper and lower bounds for outlier detection
@@ -55,8 +58,8 @@ def remove_outliers(df: pd.DataFrame, lat_col: str, lon_col: str) -> pd.DataFram
   lon_lower_bound = lon_Q1 - 1.5 * lon_IQR
 
   # Remove outliers based on latitude and longitude
-  df = df[(df[lat_col] > lat_lower_bound) & (df[lat_col] < lat_upper_bound) &
-          (df[lon_col] > lon_lower_bound) & (df[lon_col] < lon_upper_bound)]
+  df = df[(df[C_LATITUDE] > lat_lower_bound) & (df[C_LATITUDE] < lat_upper_bound) &
+          (df[C_LONGITUDE] > lon_lower_bound) & (df[C_LONGITUDE] < lon_upper_bound)]
 
   return df
 
@@ -134,16 +137,33 @@ def get_similarities(df: pd.DataFrame, weights: List[float]) -> np.ndarray:
   similarities = np.array([])
   weights_name = '_'.join([str(int(x * 100)) for x in weights])
   filename = FILE_SIMILARITIES.format(weights_name)
-  if os.path.exists(filename):
-    similarities = np.load(filename)
-  if similarities.size == 0:
-    similarities = compute_similarities(df, weights)
-    np.save(filename, similarities)
+  compute_array = partial(compute_similarities, df, weights)
+  similarities = save_npy_to_gridfs(compute_array, 'similarities', filename)
   return similarities
 
 
+def save_npy_to_gridfs(compute_array, collection_name, file_name):
+  client = MongoClient(MONGODB_CONNECTION)
+  db = client[MONGODB_PROJECT]
+  fs = gridfs.GridFS(db, collection=collection_name)
+
+  file_doc = fs.find_one({'filename': file_name})
+  if file_doc is None:
+    npy_array = compute_array()
+    bytes_io = io.BytesIO()
+    np.save(bytes_io, npy_array)
+    npy_bytes = bytes_io.getvalue()
+    with fs.new_file(filename=file_name) as fp:
+      fp.write(npy_bytes)
+      file_doc = fp
+  contents = fs.get(file_doc._id).read()
+  npy_array = np.load(io.BytesIO(contents))
+  client.close()
+  return npy_array
+
+
 def df_clustering(df: pd.DataFrame, threshold: float, weights: List[float]) -> pd.DataFrame:
-  df = remove_outliers(df, 'latitude', 'longitude')
+  df = remove_outliers(df)
   similarities = get_similarities(df, weights)
   df['cluster'] = autocluster(similarities, threshold)
   return df
@@ -195,7 +215,7 @@ def plot(df: pd.DataFrame, similarities: List, dates: List):
 
 if __name__ == '__main__':
   df = file_to_df(FILE_CITIZEN_REPORTS).set_index(C_REPORT_ID)
-  df = remove_outliers(df, 'latitude', 'longitude')
+  df = remove_outliers(df)
   similarities = get_similarities(WEIGHTS)
   df['cluster'] = autocluster(similarities, THRESHOLD)
   dates = pd.to_datetime(df[C_DATE], format='%Y-%m-%d %H:%M:%S')

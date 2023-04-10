@@ -1,19 +1,20 @@
 import os
 
 from dotenv import load_dotenv
-from common.utils import as_messages
 
 load_dotenv()
 
-C_REPORT = 'report'
 C_REPORT_ID = 'report_id'
 C_COMPLAINT = 'complaint'
-C_KEYWORDS = 'alias'
+C_KEYWORDS = 'keywords'
+C_ADDRESS = 'address'
 C_NEIGHBORHOOD = 'neighborhood'
 C_DATE = 'date'
 C_SECTOR = 'sector'
 C_LOCATION = 'location'
 C_SCORE = 'score'
+C_LATITUDE = 'latitude'
+C_LONGITUDE = 'longitude'
 
 GOOGLE_MAPS_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json'
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
@@ -21,16 +22,13 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_API_ENV = os.getenv('PINECONE_API_ENV')
-PINECONE_INDEX_COMPLAINTS = 'citizen-complaints-2023'  # 'citizen-complaints'
-PINECONE_INDEX_DOCUMENTS = 'urban-planning-documents'
+PINECONE_INDEX_COMPLAINTS = 'citizen-complaints-2023'
+PINECONE_INDEX_NAME = 'ai-urban-planning'
 DOCS_INDEX_DIR = 'data/db/urban-planning-documents'
-COMPLAINTS_INDEX_DIR = 'data/db/complaints'
-# ['municipality', 'release_date', 'title', 'topic']
-KEEP_COLUMNS = [C_COMPLAINT, C_DATE, C_SECTOR, C_NEIGHBORHOOD, 'alias', 'issue', 'report_id']
+KEEP_COLUMNS = [C_REPORT_ID, C_COMPLAINT, C_DATE, C_SECTOR, C_NEIGHBORHOOD, C_KEYWORDS]
+MONGODB_CONNECTION = os.getenv('MONGODB_CONNECTION')
+MONGODB_PROJECT = 'comunia'
 
-# 'data/csvs/congestionamiento-vial.csv'
-FILE_CITIZEN_COMPLAINTS = 'data/csvs/atencion_ciudadana_2023.csv'
-# 'data/jsons/citizen_reports.yaml'
 FILE_CITIZEN_REPORTS = 'data/jsons/citizen_reports_2023.yaml'
 FILE_NEIGHBORHOOD_REPORTS = 'data/jsons/comunity_reports_2023.yaml'
 FILE_URBAN_DOCUMENTS = 'data/jsons/urban_planning_documents.yaml'

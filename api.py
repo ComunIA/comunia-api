@@ -15,7 +15,6 @@ MIN_GENERATE_CLUSTER = 3
 
 app = Flask(__name__)
 cors = CORS(app, support_credentials=True)
-# app.secret_key = os.getenv('API_SECRET_KEY')
 app.config['JSON_AS_ASCII'] = False
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SECRET_KEY'] = os.getenv('API_SECRET_KEY')

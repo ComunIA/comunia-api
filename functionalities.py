@@ -6,8 +6,9 @@ import pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 
 from common.constants import *
+from common.utils import *
+from common.db import get_complaints
 from common.gpt_actions import summarize_complaints, question_complaints, complaints_db
-from common.utils import normalize, file_to_df, groupby, to_text_list, save_yaml, ids_to_hash
 from clustering import df_clustering
 
 NUM_KNOWLEDGE_RESULTS = 3
@@ -30,14 +31,14 @@ class Filtering:
 
 messages: Dict[str, List[Tuple[str, str]]] = {}
 filtering = Filtering()
-df_complaints = file_to_df(FILE_CITIZEN_REPORTS, C_REPORT_ID)
+df_complaints = get_complaints()
 df_processed = df_clustering(df_complaints, filtering.threshold, CLUSTER_PERCENTAGES)
 
 
 def get_complaints_score(query: str, amount: int, vector_filter=None) -> pd.DataFrame:
   docs = complaints_db.similarity_search_with_score(query, amount, vector_filter, 'complaints')
-  results = [dict(report_id=doc.metadata['report_id'], score=score) for doc, score in docs]
-  df_score = pd.DataFrame(results).set_index('report_id')
+  results = [{C_REPORT_ID: doc.metadata[C_REPORT_ID], "score": score} for doc, score in docs]
+  df_score = pd.DataFrame(results).set_index(C_REPORT_ID)
   df_score[C_SCORE] = normalize(df_score[C_SCORE])
   return df_score
 
@@ -48,6 +49,7 @@ def filter_complaints(new_filtering: Filtering) -> pd.DataFrame:
   prev_threshold = filtering.threshold
   filtering = new_filtering
   if prev_threshold != filtering.threshold:
+    df_complaints = get_complaints()
     df_processed = df_clustering(df_complaints, filtering.threshold, filtering.percentages)
   df_temp = df_processed
   vector_filter = None
@@ -57,7 +59,8 @@ def filter_complaints(new_filtering: Filtering) -> pd.DataFrame:
     vector_filter = {C_KEYWORDS: {'$in': key_words}}
   if filtering.problem:
     df_score = get_complaints_score(filtering.problem, len(df_temp), vector_filter)
-    df_temp = df_temp.loc[df_score.index]
+    valid_indices = df_score.index.intersection(df_temp.index)
+    df_temp = df_temp.loc[df_score.loc[valid_indices].index]
     df_temp[C_SCORE] = df_score[C_SCORE]
   else:
     df_temp[C_SCORE] = None
@@ -65,12 +68,11 @@ def filter_complaints(new_filtering: Filtering) -> pd.DataFrame:
 
 
 def grouping_community(df: pd.DataFrame) -> pd.DataFrame:
-  df_temp = groupby(df.reset_index(), 'cluster', dict(
-      latitude=np.mean,
-      longitude=np.mean,
-      alias=lambda x: list(set(x)),
-      issue=lambda x: list(set(x))
-  ))
+  df_temp = groupby(df.reset_index(), 'cluster', {
+      C_LATITUDE: np.mean,
+      C_LONGITUDE: np.mean,
+      C_KEYWORDS: lambda x: list(set(x)),
+  })
   df_temp['num_reports'] = df_temp[C_COMPLAINT].map(len)
   return df_temp
 
@@ -91,7 +93,7 @@ def generate_report(report_ids: List[str]) -> str:
   if not df_community_reports.empty and id in df_community_reports.index:
     return df_community_reports.loc[id]['report']
 
-  complaints = df_complaints.loc[report_ids]['complaint']
+  complaints = get_complaints_from_ids(report_ids)['complaint']
   report = summarize_complaints(complaints)
   reports = []
   if not df_community_reports.empty:

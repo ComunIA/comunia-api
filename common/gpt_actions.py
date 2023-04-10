@@ -15,7 +15,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
 from langchain.agents import initialize_agent
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import Pinecone
 from langchain.chains import RetrievalQA
 from langchain.agents import ConversationalAgent, AgentExecutor
 from langchain import LLMChain
@@ -35,8 +34,7 @@ pinecone.init(
 )
 index = pinecone.Index('ai-urban-planning')
 embeddings = OpenAIEmbeddings()
-complaints_db = Pinecone(index, embeddings.embed_query, 'complaint')
-# docs_db = Pinecone(persist_directory=DOCS_INDEX_DIR, embedding_function=embeddings)
+complaints_db = Pinecone(index, embeddings.embed_query, C_COMPLAINT)
 
 
 _template = """Dada la siguiente conversacion y una pregunta de seguimiento, reformula la pregunta de seguimiento para que sea una pregunta independiente.
