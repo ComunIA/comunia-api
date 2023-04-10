@@ -163,7 +163,7 @@ def save_npy_to_gridfs(compute_array, collection_name, file_name):
 
 
 def df_clustering(df: pd.DataFrame, threshold: float, weights: List[float]) -> pd.DataFrame:
-  df = remove_outliers(df)
+  # df = remove_outliers(df)
   similarities = get_similarities(df, weights)
   df['cluster'] = autocluster(similarities, threshold)
   return df
