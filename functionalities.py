@@ -7,7 +7,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 
 from common.constants import *
 from common.utils import *
-from common.db import get_complaints
+from common.db import find_complaints
 from common.gpt_actions import summarize_complaints, question_complaints, complaints_db
 from clustering import df_clustering
 
@@ -30,9 +30,9 @@ class Filtering:
 
 
 messages: Dict[str, List[Tuple[str, str]]] = {}
-filtering = Filtering()
-df_complaints = get_complaints()
-df_processed = df_clustering(df_complaints, filtering.threshold, CLUSTER_PERCENTAGES)
+# filtering = Filtering()
+# df_complaints = get_complaints()
+# df_processed = df_clustering(df_complaints, filtering.threshold, CLUSTER_PERCENTAGES)
 
 
 def get_complaints_score(query: str, amount: int, vector_filter=None) -> pd.DataFrame:
@@ -43,28 +43,16 @@ def get_complaints_score(query: str, amount: int, vector_filter=None) -> pd.Data
   return df_score
 
 
-def filter_complaints(new_filtering: Filtering) -> pd.DataFrame:
-  global df_processed
-  global filtering
-  prev_threshold = filtering.threshold
-  filtering = new_filtering
-  if prev_threshold != filtering.threshold:
-    df_complaints = get_complaints()
-    df_processed = df_clustering(df_complaints, filtering.threshold, filtering.percentages)
-  df_temp = df_processed
-  vector_filter = None
-  if filtering.key_words:
-    key_words = [np.nan if x == 'Otro' else x for x in filtering.key_words]
-    df_temp = df_temp[df_temp[C_KEYWORDS].isin(key_words)]
-    vector_filter = {C_KEYWORDS: {'$in': key_words}}
+def score_complaints(df: pd.DataFrame, filtering: Filtering) -> pd.DataFrame:
   if filtering.problem:
-    df_score = get_complaints_score(filtering.problem, len(df_temp), vector_filter)
-    valid_indices = df_score.index.intersection(df_temp.index)
-    df_temp = df_temp.loc[df_score.loc[valid_indices].index]
-    df_temp[C_SCORE] = df_score[C_SCORE]
+    vector_filter = {C_KEYWORDS: {'$in': filtering.key_words}} if filtering.key_words else None
+    df_score = get_complaints_score(filtering.problem, len(df), vector_filter)
+    valid_indices = df_score.index.intersection(df.index)
+    df = df.loc[df_score.loc[valid_indices].index]
+    df[C_SCORE] = df_score[C_SCORE]
   else:
-    df_temp[C_SCORE] = None
-  return df_temp
+    df[C_SCORE] = None
+  return df
 
 
 def grouping_community(df: pd.DataFrame) -> pd.DataFrame:

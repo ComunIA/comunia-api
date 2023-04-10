@@ -10,7 +10,7 @@ db = client[MONGODB_PROJECT]
 complaints_collection = db['complaints']
 
 
-def get_complaints(keywords: List[str] = []):
+def find_complaints(keywords: List[str] = []):
   filtering = {C_KEYWORDS: {'$in': keywords}} if keywords else {}
   data = complaints_collection.find(filtering)
   df = pd.DataFrame.from_dict(list(data))

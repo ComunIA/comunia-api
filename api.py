@@ -7,7 +7,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 
 from common.utils import ids_to_hash
-from functionalities import filter_complaints, grouping_community, messages, get_answer, generate_report, Filtering
+from functionalities import *
+from clustering import df_clustering
+from common.db import find_complaints
 
 PORT = 8000
 MIN_GENERATE_CLUSTER = 3
@@ -40,19 +42,25 @@ def api_key_required(f):
 @api_key_required
 def get_complaints():
   data = request.get_json()
-  new_filtering = Filtering(**data['filtering'])
-  df_temp = filter_complaints(new_filtering)
-  df_temp = df_temp.reset_index()
-  return jsonify(df_temp.to_dict('records'))
+  filtering = Filtering(**data['filtering'])
+  df = find_complaints(filtering.key_words)
+  df = score_complaints(df, filtering)
+  df = df.reset_index()
+  return jsonify(df.to_dict('records'))
 
 
 @app.route('/reports', methods=['POST'])
 @api_key_required
 def get_reports():
   data = request.get_json()
-  new_filtering = Filtering(**data['filtering'])
-  df_temp = filter_complaints(new_filtering)
-  df_reports = grouping_community(df_temp)
+  filtering = Filtering(**data['filtering'])
+  df = find_complaints()
+  df = df_clustering(df, filtering.threshold, filtering.percentages)
+  if filtering.key_words:
+    df = df[df[C_KEYWORDS].isin(filtering.key_words)]
+
+  df = score_complaints(df, filtering)
+  df_reports = grouping_community(df)
   df_reports = df_reports.reset_index()
   return jsonify(df_reports.to_dict('records'))
 

@@ -1,5 +1,7 @@
+from typing import List
 from bs4 import BeautifulSoup
 import pandas as pd
+import numpy as np
 
 import requests
 from geopy.geocoders import Nominatim
@@ -72,11 +74,16 @@ def get_address_from_coords(lat, lon):
   return location.address
 
 
-def process_data(df: pd.DataFrame, date: str = None):
+def process_data(df: pd.DataFrame, date: str = None, keywords: List[str] = []):
   df = rename_columns(df, COLUMNS)
-  df = df[(df[C_COMPLAINT] != "") & (~df[C_COMPLAINT].isna())]
-  df = df[df[C_KEYWORDS].isin(KEYWORDS_FILTER)]
+  if keywords:
+    df = df[df[C_KEYWORDS].isin(keywords)]
+  df = df.replace(r'^\s*$', np.nan, regex=True)
+  df = df.fillna(value=np.nan)
+  df = df.dropna(subset=[C_REPORT_ID, C_DATE, C_COMPLAINT, C_LATITUDE, C_LONGITUDE], how='any')
+
   df = df.fillna("")
+  df[[C_LATITUDE, C_LONGITUDE]] = df[[C_LATITUDE, C_LONGITUDE]].apply(pd.to_numeric)
   # df[C_ADDRESS] = df[[C_LATITUDE, C_LONGITUDE]].apply(lambda x: get_address_from_coords(*x), axis=1)
 
   df[C_DATE] = pd.to_datetime(df[C_DATE], format="%d/%m/%Y %H:%M:%S")
@@ -99,7 +106,7 @@ if __name__ == "__main__":
     else:
       df_final = df_final.combine_first(df_new)
   print('Size total:', len(df_final))
-  df_final = process_data(df_final.reset_index(), "2023-01-01")
+  df_final = process_data(df_final.reset_index(), "2023-01-01", KEYWORDS_FILTER)
   print('Size processed:', len(df_final))
 
   save_yaml(FILE_CITIZEN_REPORTS, df_final.to_dict('records'))
